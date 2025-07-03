@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Metro Map</title>
+    <link rel="stylesheet" href="mapCss.css">
+</head>
+
+
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">METRO-ON-LINE</div>
+            <ul>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Support</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Register</a></li>
+                <li><button class="login-btn">Login</button></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <div class="tools">
+        <div class="map-zoom">
+            <ul>
+                <li id="zoomIn">+</li>
+                <li id="zoomOut">-</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="content">
+        <div class="journey-planner">
+            <h2>Plan Your Journey</h2>
+
+            <!-- Dropdown and Popup Trigger -->
+            <div class="form-group">
+                <label for="from" class="label-from">From</label>
+                <div class="dropdown" id="startDropdown">
+                    <div class="search-container">
+                        <input type="text" id="startSearch" data-value="0" placeholder="Search Source Station"
+                            onfocus="showDropdown('start')" oninput="filterStations('start')">
+                        <span class="arrow-icon" id="arrowFrom">&#9662;</span>
+                    </div>
+                    <div class="dropdown-content" id="startOptions">
+                        <!-- Dropdown items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Popup Content -->
+            <div class="data-popup" id="dataPopup">
+                <div class="data-popup-header">
+                    <i class="closepopup" onclick="closePopup()">Close</i>
+                </div>
+                <form>
+                    <div class="search-popup-container">
+                        <input id="popupInput" type="text" placeholder="Search" class="form-select search-popup"
+                            oninput="filterpopupStations()">
+                    </div>
+                    <div class="popup-result">
+                        <!-- Popup Station List -->
+                        <ul id="popupStationList">
+                            <!-- Dynamically populated station list goes here -->
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+
+
+
+            <div class="form-group interchange-group">
+                <button id="interchangeBtn">
+                    <img src="switch11.svg" alt="Interchange Logo" class="interchange-logo">
+                </button>
+            </div>
+
+
+            <div class="form-group">
+                <label for="to" class="label-to">To</label>
+                <div class="dropdown" id="endDropdown">
+                    <div class="search-container">
+                        <input type="text" id="endSearch" placeholder="Search Destination Station"
+                            onfocus="showToDropdown()" oninput="filterStations('end')">
+                        <span class="arrow-icon">&#9662;</span>
+                    </div>
+                    <div class="dropdown-content" id="endOptions">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popup Content for To -->
+            <div class="data-popup" id="dataPopupTo" style="display: none;">
+                <div class="data-popup-header">
+                    <i class="closepopup" onclick="closeToPopup()">Close</i>
+                </div>
+                <form>
+                    <div class="search-popup-container">
+                        <input id="popupInput" type="text" placeholder="Search" class="form-select search-popup"
+                            oninput="filterpopupStations('to')">
+                    </div>
+                    <div class="popup-result">
+                        <ul id="popupStationListTo">
+                            <!-- Dynamically populated station list goes here -->
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+
+
+            <div class="form-group leaving-group">
+                <label for="now-button" class="leaving-text">Leaving</label>
+                <div class="now-group">
+                    <input type="button" id="now-button" value="Now" class="now-button">
+                </div>
+            </div>
+
+            <div class="form-group time-group">
+                <div class="time-item">
+                    <label for="journey-date" class="label-journey">Journey Date</label>
+                    <input type="date" id="journey-date" required>
+                </div>
+                <div class="time-item">
+                    <label for="journey-time" class="label-journey">Journey Time</label>
+                    <input type="time" id="journey-time" required>
+                </div>
+            </div>
+
+
+
+
+            <div class="button-group">
+                <span class="reset-button">Reset</span>
+                <input type="button" id="showRouteFare" value="Show Route & Fare">
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <div class="fare-display" id="fareDisplay" style="display: none;">
+        <button class="close-button" onclick="closeFareDisplay()">Close</button>
+        <h3>Fare Result</h3>
+        <div id="fareResultContainer">
+            <strong>From:</strong> <span id="fromResult"></span><br>
+            <strong>To:</strong> <span id="toResult"></span><br>
+            <strong>Date:</strong> <span id="dateResult"></span><br>
+            <strong>Time:</strong> <span id="timeResult"></span><br>
+            <strong>Fare:</strong> <span id="fareResult"></span><br>
+            <strong>Number of Stations:</strong> <span id="stationsResult"></span><br>
+
+            <div class="button-container">
+                <button class="book-button">Book Ticket</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="map" class="map-image">
+        <svg>
+            <g height="797" width="1707" transform="translate(576.7013793945313, 158.2952087402344) scale(0.5)">
+
+
+                <g class="lines" transform="scale(0.85)">
+
+
+
+                    <path
+                        d="M 708 1475 L 624 1409 L 950 710 L 1164 718 L 1180 644 L 1294 522 L 1198 434 L 1236 268 L 1726 170 L 1726 62  "
+                        stroke="#ed1c24" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+                    </path>
+                    <path d="M 1106 716 L 1090 526 L 1012 468 L 992 316 L 924 256 L 588 142 " stroke="#0000fe"
+                        fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+                    </path>
+
+
+
+                </g>
+
+
+                <g class="interchanges" transform="scale(0.85)">
+                    <g id="I1">
+                        <rect x="1090" y="705" width="32" height="16" rx="7" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                </g>
+
+
+                <g class="stations">
+                    <g id="RHW">
+                        <rect x="1460" y="50" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1458" y="138" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1368" y="155" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1262" y="175" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1160" y="195" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1090" y="210" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1042" y="220" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1029" y="280" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1010" y="358" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1060" y="410" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="1090" y="435" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="995" y="544" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="980" y="600" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+
+                    <g id="RHW">
+                        <rect x="800" y="600" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="760" y="680" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="710" y="786" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="670" y="870" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="640" y="940" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="590" y="1040" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="565" y="1100" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="525" y="1190" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="588" y="1240" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#ed1c24" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+
+
+
+
+                    <g id="RHW">
+                        <rect x="495" y="115" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="570" y="139
+                        " width="16" height="16" rx="8" stroke-width="3" fill="#ffffff" stroke="#0000fb"
+                            class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="630" y="161" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="690" y="180" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="750" y="200" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="790" y="220" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="830" y="260" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="845" y="330" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="850" y="390" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="920" y="450" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+                    <g id="RHW">
+                        <rect x="925" y="530" width="16" height="16" rx="8" stroke-width="3" fill="#ffffff"
+                            stroke="#0000fb" class="interchange" style="cursor: pointer;"></rect>
+                    </g>
+
+
+
+
+
+
+
+
+
+
+                </g>
+
+
+
+                <g class="labels" transform="translate(80, 0)">
+
+                    <g class="label" id="MIA">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1460" y="50">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1490" y="50">Munshi Pulia</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="INR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1458" y="138">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1488" y="138">Indra Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="LJT">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1368" y="155">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1418" y="165">Lekhraj Market</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="MNR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1262" y="175">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1292" y="185">Mahanagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="VIA">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1160" y="195">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1220" y="205">Vishwavidyalaya</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="ILE">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1090" y="210">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1120" y="220">IT College</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="BHR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1042" y="220">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1092" y="240">Badshah Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="RRR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1029" y="280">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1099" y="280">RS Mishra Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="KBM">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1010" y="358">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1130" y="358">KD Singh Babu Stadium</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="HTJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1060" y="410">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1095" y="410">HazratGanj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="SVA">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="1090" y="435">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1120" y="435">Sachivalaya</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="HIJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="995" y="544">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1030" y="544">HussainGanj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="CBH">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="980" y="600">
+                            <tspan dominant-baseline="hanging" dy="0em" x="1000" y="600">Charbagh</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="DAI">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="800" y="600">
+                            <tspan dominant-baseline="hanging" dy="0em" x="815" y="620">Durgapuri</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="MAA">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="760" y="680">
+                            <tspan dominant-baseline="hanging" dy="0em" x="775" y="680">Mawaiya</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="ABD">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="710" y="786">
+                            <tspan dominant-baseline="hanging" dy="0em" x="800" y="786">Alambagh Bus Stand</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="ABH">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="670" y="870">
+                            <tspan dominant-baseline="hanging" dy="0em" x="690" y="870">Alambagh</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="SRR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="640" y="940">
+                            <tspan dominant-baseline="hanging" dy="0em" x="680" y="940">Singar Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="KAR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="590" y="1040">
+                            <tspan dominant-baseline="hanging" dy="0em" x="640" y="1040">Krishna Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="TRR">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="565" y="1100">
+                            <tspan dominant-baseline="hanging" dy="0em" x="625" y="1100">Transport Nagar</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="AUI">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="525" y="1190">
+                            <tspan dominant-baseline="hanging" dy="0em" x="525" y="1190">Amausi</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="CHH">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="588" y="1240">
+                            <tspan dominant-baseline="hanging" dy="0em" x="718" y="1240">Chowdhary Charan Singh</tspan>
+                        </text>
+                    </g>
+
+
+
+
+
+                    <g class="label" id="VTJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="495" y="115">
+                            <tspan dominant-baseline="hanging" dy="0em" x="535" y="115">Vasant Kunj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="SAJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="570" y="139
+                                                                    ">
+                            <tspan dominant-baseline="hanging" dy="0em" x="610" y="139">Sarfarazganj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="MBH">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="630" y="161">
+                            <tspan dominant-baseline="hanging" dy="0em" x="670" y="161">Musabagh</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="BGJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="690" y="180">
+                            <tspan dominant-baseline="hanging" dy="0em" x="710" y="180">Balaganj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="TRJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="750" y="200">
+                            <tspan dominant-baseline="hanging" dy="0em" x="650" y="220">Thakurganj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="NJJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="790" y="220">
+                            <tspan dominant-baseline="hanging" dy="0em" x="820" y="220">Nawajganj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="MCE">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="830" y="260">
+                            <tspan dominant-baseline="hanging" dy="0em" x="890" y="260">Medical College</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="CYY">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="845" y="330">
+                            <tspan dominant-baseline="hanging" dy="0em" x="845" y="330">City Rly</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="PYJ">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="850" y="390">
+                            <tspan dominant-baseline="hanging" dy="0em" x="890" y="390">Pandey Ganj</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="AAD">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="920" y="450">
+                            <tspan dominant-baseline="hanging" dy="0em" x="940" y="450">Aminabad</tspan>
+                        </text>
+                    </g>
+                    <g class="label" id="GDG">
+                        <text class="RHW-RI" dy="0" fill="#000"
+                            style="display: block; text-decoration: none; font-size: 16px; user-select: none;"
+                            text-anchor="end" x="925" y="530">
+                            <tspan dominant-baseline="hanging" dy="0em" x="835" y="530">Gautam Buddha Marg</tspan>
+                        </text>
+                    </g>
+
+
+
+
+
+                </g>
+            </g>
+
+
+        </svg>
+    </div>
+
+
+
+    <script src="map3.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const nowButton = document.getElementById('now-button');
+
+            // Check if the button exists
+            if (nowButton) {
+                nowButton.addEventListener('click', function () {
+                    const now = new Date();
+
+                    // Get the current date components
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                    const year = now.getFullYear();
+
+                    // Set the journey date in yyyy-mm-dd format
+                    document.getElementById('journey-date').value = `${year}-${month}-${day}`;
+
+                    // Get the current time components
+                    let hours = now.getHours();
+                    let minutes = now.getMinutes() + 5; // Add 5 minutes
+
+                    // If minutes exceed 59, increment hours
+                    if (minutes >= 60) {
+                        minutes -= 60;
+                        hours += 1;
+                        if (hours >= 24) { // Wrap around if hours exceed 23
+                            hours -= 24;
+                        }
+                    }
+
+                    // Update the time input to a format that is compatible (24-hour format)
+                    const hoursForInput = String(hours).padStart(2, '0');
+                    const minutesForInput = String(minutes).padStart(2, '0');
+                    document.getElementById('journey-time').value = `${hoursForInput}:${minutesForInput}`;
+
+                    // For display purposes in 12-hour format
+                    const displayHours = hours % 12 || 12; // Convert to 12-hour format
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const formattedTime = `${displayHours}:${minutesForInput} ${ampm}`;
+
+
+                });
+            }
+        });
+
+    </script>
+</body>
+
+</html>
